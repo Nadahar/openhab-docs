@@ -51,9 +51,6 @@ This brings up a form that lets you choose the type of the trigger and enter som
 
 ![rule triggers dialog](images/rule-triggers-dialog.png)
 
-~~The title and description are optional and will be automatically populated with meaningful information when you select the trigger.
-However pay attention and if there is more information that might be useful to you later add that.~~
-
 We need an Item changed event to trigger this rule so it runs when the cloudiness percentage Item changes.
 So I select "Item Event" and select my Item and click "Pick" in the upper right corner.
 
@@ -119,18 +116,18 @@ This can be done one of two ways.
 
 #### Using the Duplicate button
 
-Scroll to the bottom of the design tab for the rule we just created, and click `Duplicate Rule`.
+Scroll to the bottom of the design tab for the rule we just created, and click <InlineIcon :src="require('./images/duplicate-rule-button.png')" />.
 
 ![basic rule duplicate](images/basic-rule-duplicate.png)
 
-Edit `Rule ID`, `Label` and `Description` as appropriate.
+Edit "Rule ID", "Label" and "Description" as appropriate.
 
 ![basic rule duplicate 2](images/basic-rule-duplicate-2.png)
 
-Scroll down to `Then` and click the "Send command ON to visCloudy" Action to edit it.
+Scroll down to "Then" and click the "Send command ON to visCloudy" Action to edit it.
 Change the label and the command so that they reflect `OFF` instead of `ON`.
 
-Using the same logic, click and edit the two conditions under `But only if` to require `<= 50%` and `= ON` instead.
+Using the same logic, click and edit the two conditions under "But only if" to require `<= 50%` and `= ON` instead.
 
 Click `Create` in the upper right corner to save the new rule.
 
@@ -207,16 +204,21 @@ Then click "Add" to refresh the template with the new changes.
 
 #### Update a rule
 
-Either enable `Select` (or Ctrl-click) in the Rules view and select the rule(s) to regenerate, or open the design tab for the rule you wish the regenerate and click the icon with two arrows that form a circle.
+Rules can be regenerated from their template either from the Rules view or from the Design tab of a specific rule.
 
-From the Rules view, it's possible to regenerate multiple rules at once.
-Each rule that is associated with a template has an orange badge with the name of the template.
-Clicking the template badge while in "select mode", will toggle selection for all rules using this template, making it easy to regenerate all rules that are associated with the updated template at once.
+To regenerate rules form the Rules view, either click <InlineIcon height="1.2em" :src="require('./images/select-button.png')" /> or Ctrl-click one of the rules.
+Select one or more rules to regenerate and click <InlineIcon height="1.2em" :src="require('./images/regenerate_icon.svg')" />.
+Each rule that is associated with a template has an orange badge with the name of the template like this: <InlineIcon height="1.2em" :src="require('./images/rule-template-badge.png')" />.
+To automatically toggle selection of all rules associated with a specific template, click on the template badge while in "select mode".
+This makes it easy to regenerate all rules that are associated with the updated template at once.
+
+To regenerate a rule from the Design tab of the rule, simply click the regenerate button <InlineIcon height="1.2em" :src="require('./images/regenerate_icon.svg')" />.
 
 Rules can be regenerated both if the template has been updated or if you want to change some of the parameters used to generate the rule.
 Please note that it's only possible to change the parameters if the rules are regenerated one-by-one and if the rule in question is editable.
+
 An example of a situation where it would be desirable to regenerate a rule even if the template hasn't changed, is if a new Item has been created to replace an old one, and this Item is part of the rule somehow.
-By regenerating the rule and selecting the new Item, the rest of the logic will be preserved, but it will work with the new Item instead.
+By regenerating the rule and selecting the new Item, the rest of the logic will be preserved, and it will work with the new Item instead.
 
 ### Customization of Rules Created From Templates
 
@@ -224,7 +226,7 @@ What if a rule template does almost what you need but not everything?
 You could simply modify the template-based rule itself.
 But, if you ever were to regenerate the rule in the future, your modifications would be lost.
 A better solution is to make a copy of the template based rule that isn't associated with the template, and then modify that.
-This can be achieved by scrolling to the bottom of the design tab of the rule and clicking `Duplicate Rule`.
+This can be achieved by scrolling to the bottom of the Design tab of the rule and clicking <InlineIcon :src="require('./images/duplicate-rule-button.png')" />.
 When duplicated, template-based rules will present you with a choice:
 
 ![duplicate rule stub](images/basic-rule-stub-duplicate.png)
