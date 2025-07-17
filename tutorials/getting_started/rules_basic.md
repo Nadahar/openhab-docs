@@ -116,7 +116,7 @@ This can be done one of two ways.
 
 #### Using the Duplicate button
 
-Scroll to the bottom of the design tab for the rule we just created, and click <InlineIcon :src="require('./images/duplicate-rule-button.png')" />.
+Scroll to the bottom of the design tab for the rule we just created, and click <InlineIcon alt="Duplicate Rule button" vertical-align="bottom" :src="require('./images/duplicate-rule-button.png')" />.
 
 ![basic rule duplicate](images/basic-rule-duplicate.png)
 
@@ -206,13 +206,13 @@ Then click "Add" to refresh the template with the new changes.
 
 Rules can be regenerated from their template either from the Rules view or from the Design tab of a specific rule.
 
-To regenerate rules form the Rules view, either click <InlineIcon height="1.2em" :src="require('./images/select-button.png')" /> or Ctrl-click one of the rules.
-Select one or more rules to regenerate and click <InlineIcon height="1.2em" :src="require('./images/regenerate_icon.svg')" />.
-Each rule that is associated with a template has an orange badge with the name of the template like this: <InlineIcon height="1.2em" :src="require('./images/rule-template-badge.png')" />.
+To regenerate rules form the Rules view, either click <InlineIcon alt="Select button" height="1.2em" :src="require('./images/select-button.png')" /> or Ctrl-click one of the rules.
+Select one or more rules to regenerate and click <InlineIcon alt="Regenerate Icon" height="1.2em" :src="require('./images/regenerate_icon.svg')" />.
+Each rule that is associated with a template has an orange badge with the name of the template like this: <InlineIcon alt="Rule template badge" height="1.2em" :src="require('./images/rule-template-badge.png')" />.
 To automatically toggle selection of all rules associated with a specific template, click on the template badge while in "select mode".
 This makes it easy to regenerate all rules that are associated with the updated template at once.
 
-To regenerate a rule from the Design tab of the rule, simply click the regenerate button <InlineIcon height="1.2em" :src="require('./images/regenerate_icon.svg')" />.
+To regenerate a rule from the Design tab of the rule, simply click the regenerate button <InlineIcon alt="Regenerate icon" height="1.2em" :src="require('./images/regenerate_icon.svg')" />.
 
 Rules can be regenerated both if the template has been updated or if you want to change some of the parameters used to generate the rule.
 Please note that it's only possible to change the parameters if the rules are regenerated one-by-one and if the rule in question is editable.
@@ -220,13 +220,17 @@ Please note that it's only possible to change the parameters if the rules are re
 An example of a situation where it would be desirable to regenerate a rule even if the template hasn't changed, is if a new Item has been created to replace an old one, and this Item is part of the rule somehow.
 By regenerating the rule and selecting the new Item, the rest of the logic will be preserved, and it will work with the new Item instead.
 
+::: warning
+Rules that have been created from a template in versions of openHAB prior to 5.0, can't be regenerated. They must be manually deleted and recreated from the template first.
+:::
+
 ### Customization of Rules Created From Templates
 
 What if a rule template does almost what you need but not everything?
 You could simply modify the template-based rule itself.
 But, if you ever were to regenerate the rule in the future, your modifications would be lost.
 A better solution is to make a copy of the template based rule that isn't associated with the template, and then modify that.
-This can be achieved by scrolling to the bottom of the Design tab of the rule and clicking <InlineIcon :src="require('./images/duplicate-rule-button.png')" />.
+This can be achieved by scrolling to the bottom of the Design tab of the rule and clicking <InlineIcon alt="Duplicate Rule button" vertical-align="bottom" :src="require('./images/duplicate-rule-button.png')" />.
 When duplicated, template-based rules will present you with a choice:
 
 ![duplicate rule stub](images/basic-rule-stub-duplicate.png)
