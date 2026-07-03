@@ -243,6 +243,12 @@ ruleTemplates:
     label: Light Control
     description: Controls lights based on time of day.
     configDescriptions:
+      sensor_item:
+        type: TEXT
+        context: item
+        required: true
+        label: Sensor Item
+        description: The Item that triggers the check
       light_item:
         type: TEXT
         context: item
@@ -264,37 +270,21 @@ ruleTemplates:
         label: End Time
         description: The time to turn off the light (HH:mm).
     triggers:
-      - id: time_trigger
-        type: timer.GenericCronTrigger
+      - id: item_trigger
         config:
-          cronExpression: "0 0/1 * 1/1 * ? *"
+          itemName: "{{sensor_item}}"
+        type: ItemChanged
     actions:
       - id: light_action
         type: Script
         config:
           type: JavaScript
           script: |
-            const item = items.getItem("{{light_item}}");
-            const now = time.ZonedDateTime.now();
-
-            // Build absolute ZonedDateTime objects for today using the raw string fragments
-            let startTime = time.toZDT("{{start_time}}");
-            let endTime = time.toZDT("{{end_time}}");
-
-            // Handle time windows that cross midnight (e.g., 19:00 to 01:00)
-            if (endTime.isBefore(startTime)) {
-              if (now.isBefore(endTime)) {
-                // If it is early morning (e.g., 00:30), move the start boundary to yesterday
-                startTime = startTime.minusDays(1);
-              } else {
-                // If it is evening (e.g., 20:00), move the end boundary to tomorrow
-                endTime = endTime.plusDays(1);
-              }
+            if(time.toZDT().isBetweenTimes("{{start_time}}", "{{end_time}}")){
+              items["{{light_item}}"].sendCommandIfDifferent("ON");
+            } else {
+              items["{{light_item}}"].sendCommandIfDifferent("OFF");
             }
-
-            // Take the appropriate action
-            let turnOn = now.isAfter(startTime) && now.isBefore(endTime);
-            item.sendCommandIfDifferent(turnOn ? "ON" : "OFF");
 ```
 
 #### Example Results
@@ -425,6 +415,7 @@ rules:
       light_item: DemoSwitch
       end_time: 23:00
       start_time: 18:00
+      sensor_item: DemoSensor
 ```
 
 ##### Resulting Rule `light-control`
@@ -437,44 +428,19 @@ rules:
     label: DemoSwitch On In Evenings
     description: Controls lights based on time of day.
     triggers:
-      - id: time_trigger
+      - id: item_trigger
         config:
-          cronExpression: 0 0/1 * 1/1 * ? *
-        type: Cron
+          itemName: DemoSensor
+        type: ItemChanged
     actions:
       - id: light_action
         config:
           type: JavaScript
           script: |
-            var item = items.getItem("DemoSwitch");
-            const now = time.ZonedDateTime.now();
-
-            // Build absolute ZonedDateTime objects for today using the raw string fragments
-            let startTime = time.toZDT("18:00");
-            let endTime = time.toZDT("23:00");
-
-            // Handle time windows that cross midnight (e.g., 19:00 to 01:00)
-            if (endTime.isBefore(startTime)) {
-              if (now.isBefore(endTime)) {
-                // If it is early morning (e.g., 00:30), move the start boundary to yesterday
-                startTime = startTime.minusDays(1);
-              } else {
-                // If it is evening (e.g., 20:00), move the end boundary to tomorrow
-                endTime = endTime.plusDays(1);
-              }
-            }
-
-            // Verify if 'now' sits inside our window
-            if (now.isAfter(startTime) && now.isBefore(endTime)) {
-              // Only send command if the light isn't already ON
-              if (item.state !== "ON") {
-                item.sendCommand("ON");
-              }
+            if(time.toZDT().isBetweenTimes("18:00", "23:00")){
+              items["DemoSwitch"].sendCommandIfDifferent("ON");
             } else {
-              // Only send command if the light isn't already OFF
-              if (item.state !== "OFF") {
-                item.sendCommand("OFF");
-              }
+              items["DemoSwitch"].sendCommandIfDifferent("OFF");
             }
         type: Script
 ```
