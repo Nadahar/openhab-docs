@@ -11,7 +11,7 @@ This page describes the `ruleTemplates` element for [YAML Configuration](./).
 
 The `ruleTemplates` top-level key contains a map of rule templates, defined by their template UIDs.
 The main building blocks of rules are triggers, conditions and actions, collectively called modules.
-Rule templates lets you reuse the same definition in multiple rules, reducing duplication and improving maintainability, by using placeholders in the module configurations.
+Rule templates let you reuse the same definition in multiple rules, reducing duplication and improving maintainability, by using placeholders in the module configurations.
 When instantiating/generating a rule from a rule template, you define the values of the placeholders, which will then be substituted before the rule template becomes a rule.
 That way you can apply the same logic to several situations.
 
@@ -100,30 +100,30 @@ ruleTemplates:
 A rule template uses placeholders in the module configurations.
 These placeholders must be substituted with actual values before a rule can be instantiated from a rule template.
 The `configDescriptions` section defines these placeholders as configuration description parameters.
-There must be one configuration description parameters per placeholder, and their names must match.
+There must be one configuration description parameter per placeholder, and their names must match.
 Otherwise, generating rules from the rule template will fail.
 
-| Key              | Required | Description                                                                                                |
-|:-----------------|:--------:|:-----------------------------------------------------------------------------------------------------------|
-| `label`          |    ☐     | The parameter label.                                                                                       |
-| `description`    |    ☐     | The parameter description.                                                                                 |
-| `type`           |    ☑     | The parameter type, One of `TEXT`, `INTEGER`, `DECIMAL` and `BOOLEAN`.                                     |
-| `context`        |    ☐     | The parameter context, triggers special behavior in the UI like a lookup or syntax validation.             |
-| `default`        |    ☐     | The default parameter value.                                                                               |
-| `required`       |    ☑     | Whether the parameter is required. Defaults to `false`, but should be `true` for rule template parameters. |
-| `min`            |    ☐     | The minimum parameter value, applies to `INTEGER` parameters only.                                         |
-| `max`            |    ☐     | The maximum parameter value, applies to `INTEGER` parameters only.                                         |
-| `step`           |    ☐     | The parameter value step size, applies to `INTEGER` parameters only.                                       |
-| `pattern`        |    ☐     | A regular expression used for validation, applies to `TEXT` parameters only.                               |
-| `readOnly`       |    ☐     | Makes the parameter read-only. Defaults to `false`.                                                        |
-| `advanced`       |    ☐     | Makes the parameter hidden unless advanced parameters are shown. Defaults to `false`.                      |
-| `unit`           |    ☐     | The parameter value unit.                                                                                  |
-| `unitLabel`      |    ☐     | The parameter value unit label.                                                                            |
-| `options`        |    ☐     | A list of predefined parameter values. Each option have a `value` and an optional `label`.                 |
-| `multiple`       |    ☐     | Allows selecting more than one option if `options` are defined. Defaults to `false`.                       |
-| `multipleLimit`  |    ☐     | Defines the maximum number of selectable options, if `options` are defined and `multiple` is `true`.       |
-| `limitToOptions` |    ☐     | Allows custom values in addition to the predefined `options` if `false`. Defaults to `true`.               |
-| `filterCriteria` |    ☐     | Can be used in combination with certain `context`s to filter e.g. `Item`s that are shown in the lookup.    |
+| Key              | Required | Description                                                                                                                                                                                             |
+|:-----------------|:--------:|:--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `label`          |    ☐     | The parameter label.                                                                                                                                                                                    |
+| `description`    |    ☐     | The parameter description.                                                                                                                                                                              |
+| `type`           |    ☑     | The parameter type, One of `TEXT`, `INTEGER`, `DECIMAL` and `BOOLEAN`.                                                                                                                                  |
+| `context`        |    ☐     | The parameter context, triggers special behavior in the UI like a lookup or syntax validation. See [Supported Contexts](../../developers/addons/config-xml.md#supported-contexts) for details.          |
+| `filterCriteria` |    ☐     | Can be used in combination with certain `context`s to filter e.g. `Item`s that are shown in the lookup. See [Supported Contexts](../../developers/addons/config-xml.md#supported-contexts) for details. |
+| `default`        |    ☐     | The default parameter value.                                                                                                                                                                            |
+| `required`       |    ☑     | Whether the parameter is required. Defaults to `false`, but should be `true` for rule template parameters.                                                                                              |
+| `min`            |    ☐     | The minimum parameter value, applies to `INTEGER` parameters only.                                                                                                                                      |
+| `max`            |    ☐     | The maximum parameter value, applies to `INTEGER` parameters only.                                                                                                                                      |
+| `step`           |    ☐     | The parameter value step size, applies to `INTEGER` parameters only.                                                                                                                                    |
+| `pattern`        |    ☐     | A regular expression used for validation, applies to `TEXT` parameters only.                                                                                                                            |
+| `readOnly`       |    ☐     | Makes the parameter read-only. Defaults to `false`.                                                                                                                                                     |
+| `advanced`       |    ☐     | Makes the parameter hidden unless advanced parameters are shown. Defaults to `false`.                                                                                                                   |
+| `unit`           |    ☐     | The parameter value unit.                                                                                                                                                                               |
+| `unitLabel`      |    ☐     | The parameter value unit label.                                                                                                                                                                         |
+| `options`        |    ☐     | A list of predefined parameter values. Each option have a `value` and an optional `label`.                                                                                                              |
+| `multiple`       |    ☐     | Allows selecting more than one option if `options` are defined. Defaults to `false`.                                                                                                                    |
+| `multipleLimit`  |    ☐     | Defines the maximum number of selectable options, if `options` are defined and `multiple` is `true`.                                                                                                    |
+| `limitToOptions` |    ☐     | Allows custom values in addition to the predefined `options` if `false`. Defaults to `true`.                                                                                                            |
 
 ### Modules Sections
 
@@ -135,7 +135,7 @@ The only difference is that the `config` sections can contain placeholders of th
 ```yaml
 version: 1
 
-rules:
+ruleTemplates:
   lights-on:
     label: "Turn on light at sunset"
     description: "This rule turns on the living room light when the sun sets."
@@ -195,4 +195,48 @@ rules:
           sink: enhancedjavasound
           text: Welcome
         type: Say
+  light_control_template:
+    label: Light Control Template
+    description: A template for controlling lights based on time.
+    configDescriptions:
+      room_name:
+        type: TEXT
+        required: true
+        label: Room Name
+        description: The name of the room where the light is located.
+      start_time:
+        type: TEXT
+        required: true
+        pattern: '^([01]\\d|2[0-3]):?([0-5]\\d)$'
+        label: Start Time
+        description: The time to turn on the light (HH:mm).
+      end_time:
+        type: TEXT
+        required: true
+        pattern: '^([01]\\d|2[0-3]):?([0-5]\\d)$'
+        label: End Time
+        description: The time to turn off the light (HH:mm).
+    triggers:
+      - id: time_trigger
+        type: timer.GenericCronTrigger
+        config:
+          cronExpression: "0 0/1 * 1/1 * ? *" # Every minute
+    conditions:
+      - id: time_condition
+        type: core.TimeOfDayCondition
+        config:
+          start: "{{start_time}}"
+          end: "{{end_time}}"
+    actions:
+      - id: light_action
+        type: script.JSAction
+        config:
+          script: |
+            var room = items.getItem("g{{room_name}}");
+            if (now().isAfter(now().withTimeAtStartOfDay().plusHours(parseInt(config.start.split(':')[0])).plusMinutes(parseInt(config.start.split(':')[1]))) &&
+                now().isBefore(now().withTimeAtStartOfDay().plusHours(parseInt(config.end.split(':')[0])).plusMinutes(parseInt(config.end.split(':')[1])))) {
+              room.members.forEach(function(item) { item.sendCommand(ON); });
+            } else {
+              room.members.forEach(function(item) { item.sendCommand(OFF); });
+            }
 ```
