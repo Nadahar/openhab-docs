@@ -136,9 +136,16 @@ The only difference is that the `config` sections can contain placeholders of th
 version: 1
 
 ruleTemplates:
-  lights-on:
+  light-on:
     label: "Turn on light at sunset"
-    description: "This rule turns on the living room light when the sun sets."
+    description: "This rule turns on the selected light when the sun sets."
+    configDescriptions:
+      lightItem:
+        context: item
+        description: The Item that controls the light
+        label: Light Item
+        required: true
+        type: TEXT
     triggers:
       - type: ChannelEvent
         label: Sunset
@@ -148,7 +155,7 @@ ruleTemplates:
     actions:
       - type: SendCommand
         config:
-          item: LivingRoomLight
+          item: "{{lightItem}}"
           command: ON
   welcome-rule:
     label: Welcome Rule
@@ -239,4 +246,46 @@ ruleTemplates:
             } else {
               room.members.forEach(function(item) { item.sendCommand(OFF); });
             }
+```
+
+#### Example Results
+
+Rule templates can be instantiated to rules using rule stubs, `Rule` objects that only contain the UID, label and placeholders configuration.
+Here are examples of rule stubs for the example rule templates, and the resulting rules that are generated.
+
+##### Stub
+
+```yaml
+version: 1
+rules:
+  light-on-demo:
+    template: light-on
+    label: Demo Light On At Sunset
+    description: This rule turns on the selected light when the sun sets.
+    config:
+      lightItem: DemoSwitch
+```
+
+##### Resulting Rule
+
+```yaml
+version: 1
+rules:
+  light-on-demo:
+    template: light-on
+    label: Demo Light On At Sunset
+    description: This rule turns on the selected light when the sun sets.
+    config:
+      lightItem: DemoSwitch
+    triggers:
+      - label: Sunset
+        config:
+          event: START
+          channelUID: astro:sun:local:set#event
+        type: ChannelEvent
+    actions:
+      - config:
+          item: DemoSwitch
+          command: ON
+        type: SendCommand
 ```
