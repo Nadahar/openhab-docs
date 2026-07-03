@@ -239,49 +239,70 @@ ruleTemplates:
           sink: enhancedjavasound
           text: "{{sayText}}"
         type: Say
-  light_control_template:
-    label: Light Control Template
-    description: A template for controlling lights based on time.
+  light-control:
+    label: Light Control
+    description: Controls lights based on time of day.
     configDescriptions:
-      room_name:
+      light_item:
         type: TEXT
+        context: item
         required: true
-        label: Room Name
-        description: The name of the room where the light is located.
+        label: Light Item
+        description: The Item that controls the light
       start_time:
         type: TEXT
         required: true
-        pattern: '^([01]\\d|2[0-3]):?([0-5]\\d)$'
+        pattern: "([01]\\d|2[0-3]):?([0-5]\\d)"
+        default: "19:00"
         label: Start Time
         description: The time to turn on the light (HH:mm).
       end_time:
         type: TEXT
         required: true
-        pattern: '^([01]\\d|2[0-3]):?([0-5]\\d)$'
+        pattern: "([01]\\d|2[0-3]):?([0-5]\\d)"
+        default: "01:00"
         label: End Time
         description: The time to turn off the light (HH:mm).
     triggers:
       - id: time_trigger
         type: timer.GenericCronTrigger
         config:
-          cronExpression: "0 0/1 * 1/1 * ? *" # Every minute
-    conditions:
-      - id: time_condition
-        type: core.TimeOfDayCondition
-        config:
-          start: "{{start_time}}"
-          end: "{{end_time}}"
+          cronExpression: "0 0/1 * 1/1 * ? *"
     actions:
       - id: light_action
-        type: script.JSAction
+        type: Script
         config:
+          type: JavaScript
           script: |
-            var room = items.getItem("g{{room_name}}");
-            if (now().isAfter(now().withTimeAtStartOfDay().plusHours(parseInt(config.start.split(':')[0])).plusMinutes(parseInt(config.start.split(':')[1]))) &&
-                now().isBefore(now().withTimeAtStartOfDay().plusHours(parseInt(config.end.split(':')[0])).plusMinutes(parseInt(config.end.split(':')[1])))) {
-              room.members.forEach(function(item) { item.sendCommand(ON); });
+            var item = items.getItem("{{light_item}}");
+            const now = time.ZonedDateTime.now();
+
+            // Build absolute ZonedDateTime objects for today using the raw string fragments
+            let startTime = time.toZDT("{{start_time}}");
+            let endTime = time.toZDT("{{end_time}}");
+
+            // Handle time windows that cross midnight (e.g., 19:00 to 01:00)
+            if (endTime.isBefore(startTime)) {
+              if (now.isBefore(endTime)) {
+                // If it is early morning (e.g., 00:30), move the start boundary to yesterday
+                startTime = startTime.minusDays(1);
+              } else {
+                // If it is evening (e.g., 20:00), move the end boundary to tomorrow
+                endTime = endTime.plusDays(1);
+              }
+            }
+
+            // Verify if 'now' sits inside our window
+            if (now.isAfter(startTime) && now.isBefore(endTime)) {
+              // Only send command if the light isn't already ON
+              if (item.state !== "ON") {
+                item.sendCommand("ON");
+              }
             } else {
-              room.members.forEach(function(item) { item.sendCommand(OFF); });
+              // Only send command if the light isn't already OFF
+              if (item.state !== "OFF") {
+                item.sendCommand("OFF");
+              }
             }
 ```
 
@@ -290,24 +311,24 @@ ruleTemplates:
 Rule templates can be instantiated to rules using rule stubs, `Rule` objects that only contain the UID, label and placeholders configuration.
 Here are examples of rule stubs for the example rule templates, and the resulting rules that are generated.
 
-##### Stub 1
+##### Stub `light-on`
 
 ```yaml
 version: 1
 rules:
-  light-on-demo:
+  light-on-stub:
     template: light-on
     label: Demo Light On At Sunset
     config:
       lightItem: DemoSwitch
 ```
 
-##### Resulting Rule 1
+##### Resulting Rule `light-on`
 
 ```yaml
 version: 1
 rules:
-  light-on-demo:
+  light-on-stub:
     template: light-on
     label: Demo Light On At Sunset
     description: This rule turns on the selected light when the sun sets.
@@ -324,7 +345,7 @@ rules:
         type: SendCommand
 ```
 
-##### Stub 2
+##### Stub `welcome`
 
 ```yaml
 version: 1
@@ -340,7 +361,7 @@ rules:
       heatingItem: ControlSignal
 ```
 
-##### Resulting Rule 2
+##### Resulting Rule `welcome`
 
 ```yaml
 version: 1
@@ -398,4 +419,71 @@ rules:
           sink: enhancedjavasound
           text: "Welcome visitor, please feel the heat"
         type: Say
+```
+
+##### Stub `light-control`
+
+```yaml
+version: 1
+rules:
+  light-control-stub:
+    template: light-control
+    label: DemoSwitch On In Evenings
+    description: Controls lights based on time of day.
+    config:
+      light_item: DemoSwitch
+      end_time: 23:00
+      start_time: 18:00
+```
+
+##### Resulting Rule `light-control`
+
+```yaml
+version: 1
+rules:
+  light-control-stub:
+    template: light-control
+    label: DemoSwitch On In Evenings
+    description: Controls lights based on time of day.
+    triggers:
+      - id: time_trigger
+        config:
+          cronExpression: 0 0/1 * 1/1 * ? *
+        type: Cron
+    actions:
+      - id: light_action
+        config:
+          type: JavaScript
+          script: |
+            var item = items.getItem("DemoSwitch");
+            const now = time.ZonedDateTime.now();
+
+            // Build absolute ZonedDateTime objects for today using the raw string fragments
+            let startTime = time.toZDT("18:00");
+            let endTime = time.toZDT("23:00");
+
+            // Handle time windows that cross midnight (e.g., 19:00 to 01:00)
+            if (endTime.isBefore(startTime)) {
+              if (now.isBefore(endTime)) {
+                // If it is early morning (e.g., 00:30), move the start boundary to yesterday
+                startTime = startTime.minusDays(1);
+              } else {
+                // If it is evening (e.g., 20:00), move the end boundary to tomorrow
+                endTime = endTime.plusDays(1);
+              }
+            }
+
+            // Verify if 'now' sits inside our window
+            if (now.isAfter(startTime) && now.isBefore(endTime)) {
+              // Only send command if the light isn't already ON
+              if (item.state !== "ON") {
+                item.sendCommand("ON");
+              }
+            } else {
+              // Only send command if the light isn't already OFF
+              if (item.state !== "OFF") {
+                item.sendCommand("OFF");
+              }
+            }
+        type: Script
 ```
