@@ -274,7 +274,7 @@ ruleTemplates:
         config:
           type: JavaScript
           script: |
-            var item = items.getItem("{{light_item}}");
+            const item = items.getItem("{{light_item}}");
             const now = time.ZonedDateTime.now();
 
             // Build absolute ZonedDateTime objects for today using the raw string fragments
@@ -292,24 +292,15 @@ ruleTemplates:
               }
             }
 
-            // Verify if 'now' sits inside our window
-            if (now.isAfter(startTime) && now.isBefore(endTime)) {
-              // Only send command if the light isn't already ON
-              if (item.state !== "ON") {
-                item.sendCommand("ON");
-              }
-            } else {
-              // Only send command if the light isn't already OFF
-              if (item.state !== "OFF") {
-                item.sendCommand("OFF");
-              }
-            }
+            // Take the appropriate action
+            let turnOn = now.isAfter(startTime) && now.isBefore(endTime);
+            item.sendCommandIfDifferent(turnOn ? "ON" : "OFF");
 ```
 
 #### Example Results
 
 Rule templates can be instantiated to rules using rule stubs, `Rule` objects that only contain the UID, label and placeholders configuration.
-Here are examples of rule stubs for the example rule templates, and the resulting rules that are generated.
+Here are examples of rule stubs for the example rule templates, and the resulting rules.
 
 ##### Stub `light-on`
 
