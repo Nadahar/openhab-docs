@@ -157,12 +157,49 @@ ruleTemplates:
         config:
           item: "{{lightItem}}"
           command: ON
-  welcome-rule:
-    label: Welcome Rule
+  welcome:
+    label: Welcome
     description: Welcomes daytime visitors if the house is heated. 
     tags:
       - Welcome
       - Daytime
+    configDescriptions:
+      startTime:
+        label: Start Time
+        description: The time the welcomes start
+        required: true
+        type: TEXT
+        pattern: "[0-2]?\\d:[0-5]\\d"
+      endTime:
+        label: End Time
+        description: The time the welcomes end
+        required: true
+        type: TEXT
+        pattern: "[0-2]?\\d:[0-5]\\d"
+      heatingItem:
+        context: item
+        description: The Item that shows the amount of heating
+        label: Heating Item
+        required: true
+        type: TEXT
+      heatingThreshold:
+        label: Heating Threshold
+        description: Decides when there's sufficient heating for a welcome
+        required: true
+        type: INTEGER
+        default: 50
+      printText:
+        label: Print Text
+        description: What to display to visitors to welcome them
+        required: true
+        type: TEXT
+        default: Welcome
+      sayText:
+        label: Say Text
+        description: What to say to visitors to welcome them
+        required: true
+        type: TEXT
+        default: Welcome visitor
     triggers:
       - id: startlevel
         label: Start Level Trigger
@@ -171,36 +208,36 @@ ruleTemplates:
         config:
           startlevel: 80
       - label: Regular Trigger
-        description: Triggers at every 30 minutes starting at minute :15, every hour between 08 and 20, of every day.
+        description: Triggers at every 30 minutes starting at minute :15, every hour.
         type: Cron
         config:
-          cronExpression: 0 15/30 8-20 ? * * *
+          cronExpression: 0 15/30 * * * ? *
     conditions:
       - id: weekday
         type: Weekday
       - type: TimeOfDay
         label: Daytime
         config:
-          startTime: 08:00
-          endTime: 20:00
+          startTime: "{{startTime}}"
+          endTime: "{{endTime}}"
       - type: ItemState
         label: Heating Power Sufficient
         config:
-          itemName: CurrentPower
-          operator: ">"
-          state: "50"
+          itemName: "{{heatingItem}}"
+          operator: ">="
+          state: "{{heatingThreshold}}"
     actions:
       - label: Print
         description: Gives a warm welcome.
         config:
           type: Ruby
           script: |
-            puts "Hello and welcome to a heated house"
+            puts "{{printText}}"
         type: Script
       - config:
           volume: 80
           sink: enhancedjavasound
-          text: Welcome
+          text: "{{sayText}}"
         type: Say
   light_control_template:
     label: Light Control Template
@@ -253,7 +290,7 @@ ruleTemplates:
 Rule templates can be instantiated to rules using rule stubs, `Rule` objects that only contain the UID, label and placeholders configuration.
 Here are examples of rule stubs for the example rule templates, and the resulting rules that are generated.
 
-##### Stub
+##### Stub 1
 
 ```yaml
 version: 1
@@ -261,12 +298,11 @@ rules:
   light-on-demo:
     template: light-on
     label: Demo Light On At Sunset
-    description: This rule turns on the selected light when the sun sets.
     config:
       lightItem: DemoSwitch
 ```
 
-##### Resulting Rule
+##### Resulting Rule 1
 
 ```yaml
 version: 1
@@ -275,8 +311,6 @@ rules:
     template: light-on
     label: Demo Light On At Sunset
     description: This rule turns on the selected light when the sun sets.
-    config:
-      lightItem: DemoSwitch
     triggers:
       - label: Sunset
         config:
@@ -288,4 +322,80 @@ rules:
           item: DemoSwitch
           command: ON
         type: SendCommand
+```
+
+##### Stub 2
+
+```yaml
+version: 1
+rules:
+  welcome-stub:
+    template: welcome
+    label: Welcome Generated Rule
+      startTime: 09:00
+      endTime: 17:30
+      sayText: "Welcome visitor, please feel the heat"
+      heatingThreshold: 60
+      printText: A warm welcome to you
+      heatingItem: ControlSignal
+```
+
+##### Resulting Rule 2
+
+```yaml
+version: 1
+rules:
+  welcome-stub:
+    template: welcome
+    label: Welcome Generated Rule
+    tags:
+      - Welcome
+      - Daytime
+    description: Welcomes daytime visitors if the house is heated.
+    triggers:
+      - id: startlevel
+        label: Start Level Trigger
+        description: This trigger triggers at start level 80.
+        config:
+          startlevel: 80
+        type: StartLevel
+      - id: "1"
+        label: Regular Trigger
+        description: "Triggers at every 30 minutes starting at minute :15, every hour."
+        config:
+          cronExpression: 0 15/30 * * * ? *
+        type: Cron
+    conditions:
+      - id: weekday
+        config:
+          offset: 0
+        type: Weekday
+      - id: "2"
+        label: Daytime
+        config:
+          startTime: 09:00
+          endTime: 17:30
+        type: TimeOfDay
+      - id: "3"
+        label: Heating Power Sufficient
+        config:
+          itemName: ControlSignal
+          operator: '>='
+          state: "60"
+        type: ItemState
+    actions:
+      - id: "4"
+        label: Print
+        description: Gives a warm welcome.
+        config:
+          type: Ruby
+          script: |
+            puts "A warm welcome to you"
+        type: Script
+      - id: "5"
+        config:
+          volume: 80
+          sink: enhancedjavasound
+          text: "Welcome visitor, please feel the heat"
+        type: Say
 ```
